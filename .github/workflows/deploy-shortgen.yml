@@ -1,0 +1,31 @@
+name: Deploy Shortgen to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'frameforge-shortgen/**'
+      - '.github/workflows/deploy-shortgen.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy frameforge-shortgen to gh-pages/shortgen
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: frameforge-shortgen
+          destination_dir: shortgen
+          user_name: Yash Bhong
+          user_email: bhongyash111@gmail.com
+          # keep_files true keeps other content on gh-pages (e.g., Upptime site)
+          keep_files: true
