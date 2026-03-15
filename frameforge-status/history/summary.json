@@ -1,0 +1,38 @@
+[
+  {
+    "name": "FrameForge Website",
+    "url": "https://frameforge.live",
+    "icon": "https://icons.duckduckgo.com/ip3/frameforge.live.ico",
+    "slug": "frame-forge-website",
+    "status": "up",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
+    "time": 444,
+    "timeDay": 699,
+    "timeWeek": 405,
+    "timeMonth": 442,
+    "timeYear": 444,
+    "dailyMinutesDown": {}
+  },
+  {
+    "name": "FrameForge API",
+    "url": "https://api.frameforge.live/docs",
+    "icon": "https://icons.duckduckgo.com/ip3/api.frameforge.live.ico",
+    "slug": "frame-forge-api",
+    "status": "up",
+    "uptime": "100.00%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "100.00%",
+    "uptimeYear": "100.00%",
+    "time": 326,
+    "timeDay": 549,
+    "timeWeek": 334,
+    "timeMonth": 337,
+    "timeYear": 326,
+    "dailyMinutesDown": {}
+  }
+]

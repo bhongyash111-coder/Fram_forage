@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FrameForge – YouTube to Short Video</title>
+  <style>
+    :root {
+      --bg: #0e0f12;
+      --panel: #151821;
+      --panel-2: #1c2030;
+      --text: #e8eaf2;
+      --muted: #a7afc0;
+      --primary: #5865f2;
+      --primary-2: #7b86f7;
+      --danger: #e5484d;
+      --success: #42b883;
+      --warning: #f0b429;
+      --chip: #23293a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: linear-gradient(180deg, #0b0c10, #0e0f12 30%);
+      color: var(--text);
+    }
+    .container { max-width: 960px; margin: 32px auto; padding: 0 16px; }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    header h1 { font-size: 20px; margin: 0; letter-spacing: 0.3px; }
+    .panel { background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid #262b3e; border-radius: 12px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+
+    form { display: grid; gap: 12px; }
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    input[type="text"], select { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #2a3046; outline: none; background: #0f1320; color: var(--text); }
+    input[type="text"]:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(88,101,242,0.15); }
+
+    .row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+
+    .actions { display: flex; gap: 10px; }
+    button { appearance: none; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: linear-gradient(180deg, var(--primary), var(--primary-2)); color: white; }
+    .btn-secondary { background: #23283b; color: var(--text); border: 1px solid #2a3046; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .error { color: var(--danger); font-size: 13px; }
+
+    .progress { height: 10px; background: #1d2335; border: 1px solid #2a3046; border-radius: 999px; overflow: hidden; }
+    .bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00d4ff, #7b86f7); transition: width 300ms ease; }
+    .status-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    .result { margin-top: 16px; display: grid; gap: 12px; }
+    .thumb { width: 100%; max-height: 280px; object-fit: cover; border-radius: 12px; border: 1px solid #2a3046; background: #0f1320; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { background: var(--chip); border: 1px solid #2a3046; color: var(--muted); font-size: 12px; padding: 6px 8px; border-radius: 999px; }
+
+    .inline { display: inline-flex; align-items: center; gap: 6px; }
+    .muted { color: var(--muted); }
+    a.btn { text-decoration: none; display: inline-block; }
+
+    footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>FrameForge – YouTube to Short Video</h1>
+      <div class="muted">Base API: https://api.frameforge.live</div>
+    </header>
+
+    <section class="panel">
+      <form id="gen-form">
+        <div>
+          <label for="youtube_url">YouTube URL</label>
+          <input id="youtube_url" name="youtube_url" type="text" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." required />
+          <div id="url-error" class="error" style="display:none"></div>
+        </div>
+
+        <div class="row-4">
+          <div>
+            <label for="duration">Duration</label>
+            <select id="duration" name="duration">
+              <option value="30">30s</option>
+              <option value="45">45s</option>
+              <option value="60" selected>60s</option>
+              <option value="90">90s</option>
+            </select>
+          </div>
+          <div>
+            <label for="style">Style</label>
+            <select id="style" name="style">
+              <option value="highlight" selected>Highlight</option>
+              <option value="trailer">Trailer</option>
+              <option value="summary">Summary</option>
+              <option value="hook">Hook</option>
+            </select>
+          </div>
+          <div>
+            <label for="aspect_ratio">Aspect Ratio</label>
+            <select id="aspect_ratio" name="aspect_ratio">
+              <option value="9:16" selected>9:16 (Vertical)</option>
+              <option value="1:1">1:1 (Square)</option>
+              <option value="16:9">16:9 (Landscape)</option>
+            </select>
+          </div>
+          <div>
+            <label for="captions">Captions</label>
+            <select id="captions" name="captions">
+              <option value="auto" selected>Auto</option>
+              <option value="none">None</option>
+              <option value="translated">Translated</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="submit-btn" class="btn-primary" type="submit">Generate Short</button>
+          <button id="new-btn" class="btn-secondary" type="button">New</button>
+        </div>
+
+        <div id="progress-wrap" style="display:none">
+          <div class="progress" aria-label="Progress">
+            <div id="bar" class="bar"></div>
+          </div>
+          <div class="status-line">
+            <div id="status-text">Queued</div>
+            <div id="pct">0%</div>
+          </div>
+        </div>
+
+        <div id="api-error" class="error" style="display:none"></div>
+      </form>
+
+      <div id="result" class="result" style="display:none">
+        <img id="thumbnail" class="thumb" alt="Generated thumbnail" />
+        <div class="chips" id="chips"></div>
+        <div class="actions">
+          <a id="download" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Download</a>
+          <button id="copy-link" class="btn-secondary" type="button">Copy Share Link</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>Built by FrameForge • Short generator demo</footer>
+  </div>
+
+  <script type="module">
+    const API_BASE = 'https://api.frameforge.live';
+
+    // YouTube URL validation
+    export function isValidYouTubeUrl(url) {
+      try {
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, '');
+        if (host === 'youtube.com' || host === 'm.youtube.com') {
+          return u.pathname === '/watch' && u.searchParams.has('v');
+        }
+        if (host === 'youtu.be') {
+          return u.pathname.length > 1; // short id present
+        }
+        return false;
+      } catch (e) { return false; }
+    }
+
+    // DOM helpers
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      form: $('gen-form'),
+      url: $('youtube_url'),
+      urlErr: $('url-error'),
+      submit: $('submit-btn'),
+      reset: $('new-btn'),
+      progressWrap: $('progress-wrap'),
+      bar: $('bar'),
+      statusText: $('status-text'),
+      pct: $('pct'),
+      apiError: $('api-error'),
+      result: $('result'),
+      thumb: $('thumbnail'),
+      chips: $('chips'),
+      download: $('download'),
+      copy: $('copy-link'),
+      duration: $('duration'),
+      style: $('style'),
+      aspect: $('aspect_ratio'),
+      captions: $('captions'),
+    };
+
+    let pollTimer = null;
+
+    function setSubmitting(on) {
+      els.submit.disabled = on;
+      els.url.disabled = on;
+      els.duration.disabled = on;
+      els.style.disabled = on;
+      els.aspect.disabled = on;
+      els.captions.disabled = on;
+    }
+
+    function showError(el, msg) {
+      el.textContent = msg;
+      el.style.display = msg ? 'block' : 'none';
+    }
+
+    function resetUI() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      setSubmitting(false);
+      showError(els.urlErr, '');
+      showError(els.apiError, '');
+      els.progressWrap.style.display = 'none';
+      els.bar.style.width = '0%';
+      els.statusText.textContent = 'Queued';
+      els.pct.textContent = '0%';
+      els.result.style.display = 'none';
+      els.thumb.src = '';
+      els.chips.innerHTML = '';
+      els.download.removeAttribute('href');
+    }
+
+    function toChip(text) {
+      const s = document.createElement('span');
+      s.className = 'chip';
+      s.textContent = text;
+      return s;
+    }
+
+    async function createJob(payload) {
+      const res = await fetch(`${API_BASE}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API error (${res.status})`);
+      return res.json();
+    }
+
+    async function getJob(jobId) {
+      const res = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobId)}`);
+      if (!res.ok) throw new Error(`API error (${res.status})`);
+      return res.json();
+    }
+
+    function startPolling(jobId) {
+      els.progressWrap.style.display = 'block';
+      let lastPct = 0;
+      const update = async () => {
+        try {
+          const j = await getJob(jobId);
+          const { status, progress = 0 } = j;
+          lastPct = progress;
+          els.bar.style.width = `${progress}%`;
+          els.pct.textContent = `${progress}%`;
+          els.statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+          if (status === 'completed') {
+            stopPolling();
+            renderResult(j);
+          } else if (status === 'failed') {
+            stopPolling();
+            showError(els.apiError, j.error || 'Job failed');
+            setSubmitting(false);
+          }
+        } catch (e) {
+          stopPolling();
+          showError(els.apiError, e.message || 'Polling error');
+          setSubmitting(false);
+        }
+      };
+      pollTimer = setInterval(update, 3000);
+      update(); // immediate
+
+      // Optional animated progress between polls
+      const anim = setInterval(() => {
+        if (!pollTimer) { clearInterval(anim); return; }
+        const width = parseFloat(els.bar.style.width) || 0;
+        const target = Math.max(width, Math.min(99, lastPct));
+        const next = width + (target - width) * 0.2;
+        els.bar.style.width = `${next}%`;
+      }, 250);
+    }
+
+    function stopPolling() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    function renderResult(j) {
+      els.result.style.display = 'grid';
+      if (j.thumbnail_url) els.thumb.src = j.thumbnail_url; else els.thumb.removeAttribute('src');
+      els.chips.innerHTML = '';
+      if (j.duration != null) els.chips.appendChild(toChip(`Duration: ${j.duration}s`));
+      els.chips.appendChild(toChip(`Style: ${els.style.value}`));
+      els.chips.appendChild(toChip(`Aspect: ${els.aspect.value}`));
+      if (j.size_mb != null) els.chips.appendChild(toChip(`Size: ${j.size_mb.toFixed ? j.size_mb.toFixed(1) : j.size_mb} MB`));
+      if (j.share_url) els.chips.appendChild(toChip('Shareable'));
+      if (j.download_url) els.download.href = j.download_url;
+      setSubmitting(false);
+    }
+
+    els.copy.addEventListener('click', async () => {
+      const share = els.download?.href || '';
+      if (!share) return;
+      try { await navigator.clipboard.writeText(share); els.copy.textContent = 'Copied!'; setTimeout(()=>els.copy.textContent='Copy Share Link', 1200); } catch {}
+    });
+
+    els.reset.addEventListener('click', () => {
+      els.form.reset();
+      resetUI();
+      els.url.focus();
+    });
+
+    els.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showError(els.apiError, '');
+
+      const youtube_url = els.url.value.trim();
+      if (!isValidYouTubeUrl(youtube_url)) {
+        showError(els.urlErr, 'Enter a valid YouTube URL (youtube.com/watch?v=... or youtu.be/...)');
+        return;
+      }
+      showError(els.urlErr, '');
+
+      const payload = {
+        youtube_url,
+        duration: Number(els.duration.value),
+        style: els.style.value,
+        aspect_ratio: els.aspect.value,
+        captions: els.captions.value,
+      };
+
+      try {
+        setSubmitting(true);
+        const { job_id, status } = await createJob(payload);
+        if (!job_id) throw new Error('No job_id returned');
+        if (status && status !== 'queued') {
+          // continue regardless; server might return immediate status
+        }
+        startPolling(job_id);
+      } catch (err) {
+        setSubmitting(false);
+        showError(els.apiError, err?.message || 'Request failed');
+      }
+    });
+
+    // Initialize
+    resetUI();
+  </script>
+</body>
+</html>

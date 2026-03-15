@@ -1,0 +1,33 @@
+owner: arko-14
+repo: frameforge-status
+
+sites:
+  - name: FrameForge Website
+    url: https://frameforge.live
+
+  - name: FrameForge API
+    url: https://api.frameforge.live/docs
+    maxResponseTime: 10000
+
+status-website:
+  cname: status.frameforge.live   # optional (set later)
+  name: FrameForge Status
+  introTitle: "FrameForge Status"
+  introMessage: "Live status for FrameForge services."
+  navbar:
+    - title: Website
+      href: https://frameforge.live
+    - title: Status
+      href: /
+
+assignees:
+  - arko-14
+
+workflowSchedule:
+  uptime: "*/5 * * * *"   # check every 5 minutes
+  responseTime: "*/5 * * * *"
+  graphs: "0 */6 * * *"   # every 6 hours
+  summary: "0 */6 * * *"
+  updates: "0 */6 * * *"
+  staticSite: "0 */6 * * *"
+
